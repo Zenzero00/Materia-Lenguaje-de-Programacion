@@ -1,0 +1,27 @@
+[
+  {
+    "id": 1,
+    "description": "Estudiar para el examen de matemáticas",
+    "status": "En progreso"
+  },
+  {
+    "id": 2,
+    "description": "Comprar víveres para la semana",
+    "status": "Por hacer"
+  },
+  {
+    "id": 4,
+    "description": "Hacer ejercicio en el gimnasio",
+    "status": "Por hacer"
+  },
+  {
+    "id": 5,
+    "description": "Llamar al médico para la cita anual",
+    "status": "En progreso"
+  },
+  {
+    "id": 6,
+    "description": "Leer un Libro",
+    "status": "Terminada"
+  }
+]

@@ -1,0 +1,5 @@
+1. Abrir una Terminal (puede ser la de su preferencia, preferentemente Git Bash)
+2. Ubicarse en la carpeta TaskTracker (GO) en la Terminal
+3. Copiar y pegar el siguiente comando: go run main.go task.go storage.go manager.go ui.go
+4. Ejecutar y seguir las instrucciones de usuarios
+5. Disfrutar de su TaskTraker :D
