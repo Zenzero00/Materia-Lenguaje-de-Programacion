@@ -1,5 +1,7 @@
 package main
 
+import "time"
+
 type Status string
 
 const (
@@ -9,9 +11,12 @@ const (
 )
 
 type Task struct {
-	ID          int    `json:"id"`
-	Description string `json:"description"`
-	Status      Status `json:"status"`
+	ID          int       `json:"id"`
+	Description string    `json:"description"`
+	Status      Status    `json:"status"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	CompletedAt time.Time `json:"completed_at,omitempty"`
 }
 
 type TaskManager interface {

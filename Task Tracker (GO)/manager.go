@@ -1,6 +1,9 @@
 package main
 
-import "errors"
+import (
+	"errors"
+	"time"
+)
 
 type TaskManagerImpl struct {
 	storage Storage
@@ -28,10 +31,14 @@ func NewTaskManager(storage Storage) (*TaskManagerImpl, error) {
 }
 
 func (tm *TaskManagerImpl) Add(description string) error {
+	now := time.Now()
 	task := Task{
 		ID:          tm.nextID,
 		Description: description,
 		Status:      Todo,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		CompletedAt: time.Time{},
 	}
 
 	tm.tasks = append(tm.tasks, task)
@@ -40,9 +47,21 @@ func (tm *TaskManagerImpl) Add(description string) error {
 }
 
 func (tm *TaskManagerImpl) UpdateStatus(id int, status Status) error {
+	now := time.Now()
 	for i := range tm.tasks {
 		if tm.tasks[i].ID == id {
+			oldStatus := tm.tasks[i].Status
 			tm.tasks[i].Status = status
+			tm.tasks[i].UpdatedAt = now
+
+			if status == Done && oldStatus != Done {
+				tm.tasks[i].CompletedAt = now
+			}
+
+			if status != Done && oldStatus == Done {
+				tm.tasks[i].CompletedAt = time.Time{}
+			}
+
 			return tm.storage.Save(tm.tasks)
 		}
 	}

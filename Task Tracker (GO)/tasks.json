@@ -2,26 +2,41 @@
   {
     "id": 1,
     "description": "Estudiar para el examen de matemáticas",
-    "status": "En progreso"
+    "status": "En progreso",
+    "created_at": "2024-01-10T08:30:00Z",
+    "updated_at": "2024-01-18T14:20:00Z",
+    "completed_at": "0001-01-01T00:00:00Z"
   },
   {
     "id": 2,
     "description": "Comprar víveres para la semana",
-    "status": "Por hacer"
+    "status": "Por hacer",
+    "created_at": "2024-01-15T09:15:00Z",
+    "updated_at": "2024-01-15T09:15:00Z",
+    "completed_at": "0001-01-01T00:00:00Z"
   },
   {
     "id": 4,
     "description": "Hacer ejercicio en el gimnasio",
-    "status": "Por hacer"
+    "status": "Por hacer",
+    "created_at": "2024-01-16T07:45:00Z",
+    "updated_at": "2024-01-16T07:45:00Z",
+    "completed_at": "0001-01-01T00:00:00Z"
   },
   {
     "id": 5,
     "description": "Llamar al médico para la cita anual",
-    "status": "En progreso"
+    "status": "En progreso",
+    "created_at": "2024-01-12T11:00:00Z",
+    "updated_at": "2024-01-17T16:30:00Z",
+    "completed_at": "0001-01-01T00:00:00Z"
   },
   {
     "id": 6,
     "description": "Leer un Libro",
-    "status": "Terminada"
+    "status": "Terminada",
+    "created_at": "2024-01-05T19:20:00Z",
+    "updated_at": "2024-01-14T21:10:00Z",
+    "completed_at": "2024-01-14T21:10:00Z"
   }
 ]

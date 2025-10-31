@@ -33,6 +33,9 @@ func (ui *UI) PrintTasks(tasks []Task) {
 	maxIDWidth := 2
 	maxDescWidth := len("Descripción")
 	maxStatusWidth := len("Estado")
+	maxCreatedWidth := len("Creado")
+	maxUpdatedWidth := len("Último Cambio")
+	maxCompletedWidth := len("Finalizado")
 
 	for _, task := range tasks {
 		if len(fmt.Sprintf("%d", task.ID)) > maxIDWidth {
@@ -46,37 +49,66 @@ func (ui *UI) PrintTasks(tasks []Task) {
 		}
 	}
 
+	dateWidth := 16
+	maxCreatedWidth = dateWidth
+	maxUpdatedWidth = dateWidth
+	maxCompletedWidth = dateWidth
 	maxIDWidth += 2
 	maxDescWidth += 2
 	maxStatusWidth += 2
+	maxCreatedWidth += 2
+	maxUpdatedWidth += 2
+	maxCompletedWidth += 2
 
 	fmt.Println()
-	fmt.Printf("┌%s┬%s┬%s┐\n",
+	fmt.Printf("┌%s┬%s┬%s┬%s┬%s┬%s┐\n",
 		strings.Repeat("─", maxIDWidth),
 		strings.Repeat("─", maxDescWidth),
-		strings.Repeat("─", maxStatusWidth))
+		strings.Repeat("─", maxStatusWidth),
+		strings.Repeat("─", maxCreatedWidth),
+		strings.Repeat("─", maxUpdatedWidth),
+		strings.Repeat("─", maxCompletedWidth))
 
-	fmt.Printf("│%-*s│%-*s│%-*s│\n",
+	fmt.Printf("│%-*s│%-*s│%-*s│%-*s│%-*s│%-*s│\n",
 		maxIDWidth, "ID",
 		maxDescWidth, "Descripción",
-		maxStatusWidth, "Estado")
+		maxStatusWidth, "Estado",
+		maxCreatedWidth, "Creado",
+		maxUpdatedWidth, "Último Cambio",
+		maxCompletedWidth, "Finalizado")
 
-	fmt.Printf("├%s┼%s┼%s┤\n",
+	fmt.Printf("├%s┼%s┼%s┼%s┼%s┼%s┤\n",
 		strings.Repeat("─", maxIDWidth),
 		strings.Repeat("─", maxDescWidth),
-		strings.Repeat("─", maxStatusWidth))
+		strings.Repeat("─", maxStatusWidth),
+		strings.Repeat("─", maxCreatedWidth),
+		strings.Repeat("─", maxUpdatedWidth),
+		strings.Repeat("─", maxCompletedWidth))
 
 	for _, task := range tasks {
-		fmt.Printf("│%-*d│%-*s│%-*s│\n",
+		createdStr := task.CreatedAt.Format("02/01/2006 15:04")
+		updatedStr := task.UpdatedAt.Format("02/01/2006 15:04")
+		completedStr := "---"
+		if !task.CompletedAt.IsZero() {
+			completedStr = task.CompletedAt.Format("02/01/2006 15:04")
+		}
+
+		fmt.Printf("│%-*d│%-*s│%-*s│%-*s│%-*s│%-*s│\n",
 			maxIDWidth, task.ID,
 			maxDescWidth, task.Description,
-			maxStatusWidth, task.Status)
+			maxStatusWidth, task.Status,
+			maxCreatedWidth, createdStr,
+			maxUpdatedWidth, updatedStr,
+			maxCompletedWidth, completedStr)
 	}
 
-	fmt.Printf("└%s┴%s┴%s┘\n",
+	fmt.Printf("└%s┴%s┴%s┴%s┴%s┴%s┘\n",
 		strings.Repeat("─", maxIDWidth),
 		strings.Repeat("─", maxDescWidth),
-		strings.Repeat("─", maxStatusWidth))
+		strings.Repeat("─", maxStatusWidth),
+		strings.Repeat("─", maxCreatedWidth),
+		strings.Repeat("─", maxUpdatedWidth),
+		strings.Repeat("─", maxCompletedWidth))
 }
 
 func (ui *UI) HandleListAll() {

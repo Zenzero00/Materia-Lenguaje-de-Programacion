@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "description": "Estudiar para el examen de matemáticas",
+    "status": "En progreso",
+    "created_at": 1704875400,
+    "updated_at": 1705587600,
+    "completed_at": null
+  },
+  {
+    "id": 2,
+    "description": "Comprar víveres para la semana",
+    "status": "Por hacer",
+    "created_at": 1705317300,
+    "updated_at": 1705317300,
+    "completed_at": null
+  },
+  {
+    "id": 4,
+    "description": "Hacer ejercicio en el gimnasio",
+    "status": "Por hacer",
+    "created_at": 1705391100,
+    "updated_at": 1705391100,
+    "completed_at": null
+  },
+  {
+    "id": 5,
+    "description": "Llamar al médico para la cita anual",
+    "status": "En progreso",
+    "created_at": 1705069200,
+    "updated_at": 1705524600,
+    "completed_at": null
+  },
+  {
+    "id": 6,
+    "description": "Leer un Libro",
+    "status": "Terminada",
+    "created_at": 1704472800,
+    "updated_at": 1705276200,
+    "completed_at": 1705276200
+  }
+]
