@@ -32,14 +32,17 @@ async fn auth_middleware(req: Request<Body>, next: Next) -> Result<Response, Sta
         .and_then(|header| header.to_str().ok());
 
     let auth_header = if let Some(auth_header) = auth_header {
+        println!("👀 Header recibido: '{}'", auth_header); 
         auth_header
     } else {
+        println!("❌ RECHAZADO: No se encontró el encabezado Authorization");
         return Err(StatusCode::UNAUTHORIZED);
     };
 
     let token = if auth_header.starts_with("Bearer ") {
         &auth_header[7..]
     } else {
+        println!("❌ RECHAZADO: El header no empieza con 'Bearer '");
         return Err(StatusCode::UNAUTHORIZED);
     };
 
@@ -50,10 +53,11 @@ async fn auth_middleware(req: Request<Body>, next: Next) -> Result<Response, Sta
 
     match decode::<Claims>(token, &DecodingKey::from_secret(secret.as_bytes()), &validation) {
         Ok(_) => {
+            println!("✅ ACCESO CONCEDIDO: Token válido");
             Ok(next.run(req).await)
         }
         Err(err) => {
-            println!("❌ ERROR DE AUTH: {:?}", err);
+            println!("❌ RECHAZADO: Error al decodificar: {:?}", err);
             Err(StatusCode::UNAUTHORIZED)
         }
     }
@@ -66,6 +70,7 @@ async fn root() -> &'static str {
 
 async fn get_inventory() -> impl IntoResponse {
     let inventory = vec![
+        Item { id: 100, name: "Laptop Gamer".to_string(), quantity: 5, status: "En Stock".to_string() },
         Item { id: 101, name: "Teclado Mecánico".to_string(), quantity: 15, status: "En Stock".to_string() },
         Item { id: 102, name: "Monitor 24p".to_string(), quantity: 8, status: "Pocas Unidades".to_string() },
         Item { id: 103, name: "Silla Gamer".to_string(), quantity: 0, status: "Agotado".to_string() },

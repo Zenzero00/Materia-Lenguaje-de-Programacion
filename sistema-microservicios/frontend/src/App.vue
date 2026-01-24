@@ -2,11 +2,10 @@
 import { ref } from 'vue'
 import axios from 'axios'
 
-
-const email = ref('')
-const password = ref('')
+const email = ref('') 
+const password = ref('') 
 const authMessage = ref('Esperando acción...')
-const token = ref('')
+const token = ref('') 
 
 const productsList = ref([])
 const productsMessage = ref('Haz clic para cargar')
@@ -18,85 +17,98 @@ const ordersList = ref([])
 const ordersMessage = ref('Haz clic para ver pedidos')
 
 const paymentMessage = ref('Esperando pago...')
-
 const notificationMessage = ref('Esperando envío...')
-
 
 const registerUser = async () => {
   authMessage.value = 'Registrando...'
   try {
-    await axios.post('http://127.0.0.1:8000/register', { email: email.value, password: password.value })
+    await axios.post('http://localhost:8000/register', { email: email.value, password: password.value })
     authMessage.value = '✅ Registro exitoso. Haz Login.'
-  } catch (error) { authMessage.value = '❌ Error: ' + (error.response?.data?.detail || error.message) }
+  } catch (error) { 
+    authMessage.value = '❌ Error: ' + (error.response?.data?.detail || error.message) 
+  }
 }
 
 const loginUser = async () => {
   authMessage.value = 'Verificando...'
   try {
-    const res = await axios.post('http://127.0.0.1:8000/login', { email: email.value, password: password.value })
+    const res = await axios.post('http://localhost:8000/login', { email: email.value, password: password.value })
     
     token.value = res.data.access_token
-    
     authMessage.value = '✅ Login Exitoso! Token guardado.'
     console.log("Token:", token.value)
-  } catch (error) { authMessage.value = '❌ Error: ' + (error.response?.data?.detail || error.message) }
+  } catch (error) { 
+    console.error(error);
+    authMessage.value = '❌ Error: ' + (error.response?.data?.detail || error.message) 
+  }
+}
+
+const getAuthConfig = () => {
+  if (!token.value) {
+    console.warn("⚠️ ALERTA: Enviando petición SIN TOKEN para probar seguridad.");
+    return {};
+  }
+  return {
+    headers: { Authorization: `Bearer ${token.value}` }
+  };
 }
 
 const getProducts = async () => {
   productsMessage.value = 'Cargando...'
   try {
-    const config = {
-      headers: { Authorization: `Bearer ${token.value}` }
-    }
-    const res = await axios.get('http://127.0.0.1:8001/products', config)
-    
+    const res = await axios.get('http://localhost:8001/products', getAuthConfig())
     productsList.value = res.data
     productsMessage.value = '✅ Productos cargados'
-  } catch (error) { productsMessage.value = '❌ Error: ' + error.message }
+  } catch (error) { productsMessage.value = '❌ Error: ' + (error.response ? error.response.status + " " + error.response.statusText : error.message) }
 }
 
 const getInventory = async () => {
   inventoryMessage.value = 'Cargando...'
   try {
-    const res = await axios.get('http://127.0.0.1:8002/inventory')
+    const res = await axios.get('http://localhost:8002/inventory', getAuthConfig())
     inventoryList.value = res.data
     inventoryMessage.value = '✅ Stock actualizado'
-  } catch (error) { inventoryMessage.value = '❌ Error: ' + error.message }
+  } catch (error) { inventoryMessage.value = '❌ Error: ' + (error.response ? error.response.status + " " + error.response.statusText : error.message) }
 }
 
 const getOrders = async () => {
   ordersMessage.value = 'Cargando...'
   try {
-    const res = await axios.get('http://127.0.0.1:8003/orders')
+    const res = await axios.get('http://localhost:8003/orders', getAuthConfig())
     ordersList.value = res.data
     ordersMessage.value = '✅ Pedidos cargados'
-  } catch (error) { ordersMessage.value = '❌ Error: ' + error.message }
+  } catch (error) { 
+    ordersMessage.value = '❌ Error: ' + (error.response ? error.response.status + " " + error.response.statusText : error.message) 
+  }
 }
 
 const testPayment = async () => {
   paymentMessage.value = 'Procesando...'
   try {
-    const res = await axios.post('http://127.0.0.1:8004/payments', { orderId: 101, amount: 50 })
+    const res = await axios.post('http://localhost:8004/payments', 
+      { orderId: 101, amount: 50 }, 
+      getAuthConfig()
+    )
     paymentMessage.value = `✅ Estado: ${res.data.status} (ID: ${res.data.transactionId})`
-  } catch (error) { paymentMessage.value = '❌ Error: ' + error.message }
+  } catch (error) { paymentMessage.value = '❌ Error: ' + (error.response ? error.response.status + " " + error.response.statusText : error.message) }
 }
 
 const testNotification = async () => {
   notificationMessage.value = 'Enviando...'
   try {
-    const res = await axios.post('http://127.0.0.1:8005/notifications', { 
-      email: "cliente@prueba.com", 
-      message: "Su pedido ha sido enviado" 
-    })
+    const res = await axios.post('http://localhost:8005/notifications', 
+      { email: "cliente@prueba.com", message: "Su pedido ha sido enviado" },
+      getAuthConfig()
+    )
     notificationMessage.value = `✅ Email enviado a: ${res.data.recipient}`
-  } catch (error) { notificationMessage.value = '❌ Error: ' + error.message }
+  } catch (error) { notificationMessage.value = '❌ Error: ' + (error.response ? error.response.status + " " + error.response.statusText : error.message) }
 }
 </script>
 
 <template>
   <div class="container">
-    <h1>🚀 Sistema de Microservicios Completo</h1>
-    <p class="subtitle">6 Lenguajes Trabajando Juntos</p>
+    <h1>🚀 Sistema de Microservicios</h1>
+    <p class="subtitle">6 Entornos en Perfecta Armonia</p>
 
     <div class="grid">
       
@@ -125,7 +137,9 @@ const testNotification = async () => {
         <button @click="getInventory">Ver Stock</button>
         <p class="status">{{ inventoryMessage }}</p>
         <ul v-if="inventoryList.length > 0" class="list">
-          <li v-for="i in inventoryList" :key="i.product_id">ID: {{ i.product_id }} | Cant: {{ i.stock }}</li>
+          <li v-for="i in inventoryList" :key="i.id">
+            <strong>{{ i.name }}</strong>: {{ i.quantity }} ({{ i.status }})
+          </li>
         </ul>
       </div>
 
@@ -135,7 +149,7 @@ const testNotification = async () => {
         <p class="status">{{ ordersMessage }}</p>
         <ul v-if="ordersList.length > 0" class="list">
           <li v-for="o in ordersList" :key="o.id">
-            <strong>{{ o.description }}</strong> ({{ o.status }}) - ${{ o.total }}
+            {{ o.description }} ({{ o.status }}) - ${{ o.total }}
           </li>
         </ul>
       </div>
@@ -168,7 +182,7 @@ const testNotification = async () => {
 .products { border-top: 5px solid #777BB4; }   
 .inventory { border-top: 5px solid #dea584; }  
 .orders { border-top: 5px solid #f89820; }     
-.payments { border-top: 5px solid #68a063; }  
+.payments { border-top: 5px solid #68a063; }   
 .notifications { border-top: 5px solid #00add8; }
 
 input { display: block; width: 90%; margin: 10px auto; padding: 8px; }
