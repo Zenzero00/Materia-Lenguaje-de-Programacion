@@ -10,9 +10,9 @@
   {
     "id": 2,
     "description": "Comprar víveres para la semana",
-    "status": "Por hacer",
+    "status": "En progreso",
     "created_at": 1705317300,
-    "updated_at": 1705317300,
+    "updated_at": 1761990930,
     "completed_at": null
   },
   {
@@ -38,5 +38,13 @@
     "created_at": 1704472800,
     "updated_at": 1705276200,
     "completed_at": 1705276200
+  },
+  {
+    "id": 8,
+    "description": "Programar PHP",
+    "status": "Terminada",
+    "created_at": 1761989711,
+    "updated_at": 1761990509,
+    "completed_at": 1761990509
   }
 ]

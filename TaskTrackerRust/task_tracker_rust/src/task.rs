@@ -42,57 +42,58 @@ impl Task {
     }
 
     pub fn format_time(ts: Option<u64>) -> String {
-        if let Some(sec) = ts {
-            let time = UNIX_EPOCH + std::time::Duration::from_secs(sec);
-            let datetime: chrono_like::SimpleDateTime = time.into();
-            datetime.to_string()
-        } else {
-            "---".into()
+        match ts {
+            None => "---".into(),
+            Some(secs) => {
+                let mut tm: libc::tm = unsafe { std::mem::zeroed() };
+                let t = secs as i64;
+
+                #[cfg(target_os = "windows")]
+                unsafe {
+                    libc::localtime_s(&mut tm, &t);
+                }
+
+                #[cfg(not(target_os = "windows"))]
+                unsafe {
+                    libc::localtime_r(&t, &mut tm);
+                }
+
+                let year = tm.tm_year + 1900;
+                let month = tm.tm_mon + 1;
+                let day = tm.tm_mday;
+                let hour = tm.tm_hour;
+                let minute = tm.tm_min;
+
+                format!("{:02}/{:02}/{:04} {:02}:{:02}", day, month, year, hour, minute)
+            }
         }
     }
 }
 
-mod chrono_like {
-    use std::time::{SystemTime, UNIX_EPOCH};
-    use std::fmt;
+fn days_to_ymd(days_since_epoch: i64) -> (i32, u32, u32) {
+    let z = days_since_epoch + 719468; 
+    let era = if z >= 0 {
+        z / 146097
+    } else {
+        (z - 146096) / 146097
+    };
+    let doe = z - era * 146097;                            
+    let yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365; 
+    let y = (yoe + era * 400) as i32;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);            
+    let mp = (5 * doy + 2) / 153;                                
+    let day = (doy - (153 * mp + 2) / 5 + 1) as u32;             
+    let mut month = (mp + 3) as i32;                             
+    let mut year = y + (mp as i32 <= 9) as i32;                  
+    let mut year = (yoe + era * 400) as i32;
+    let doy2 = doy as i64;
+    let mp2 = mp as i64;
+    let month = if mp2 < 10 { (mp2 + 3) as u32 } else { (mp2 - 9) as u32 };
+    let year = if month <= 2 {
+        year + 1
+    } else {
+        year
+    };
 
-    pub struct SimpleDateTime {
-        pub year: i32,
-        pub month: u32,
-        pub day: u32,
-        pub hour: u32,
-        pub minute: u32,
-    }
-
-    impl From<SystemTime> for SimpleDateTime {
-        fn from(st: SystemTime) -> Self {
-            use std::time::Duration;
-            let since_epoch = st.duration_since(UNIX_EPOCH).unwrap_or(Duration::ZERO);
-            let days = since_epoch.as_secs() / 86400;
-            let year = 1970 + (days / 365) as i32;
-            let day_of_year = (days % 365) as u32;
-            let month = 1 + (day_of_year / 30);
-            let day = 1 + (day_of_year % 30);
-            let secs_today = since_epoch.as_secs() % 86400;
-            let hour = (secs_today / 3600) as u32;
-            let minute = ((secs_today % 3600) / 60) as u32;
-            Self {
-                year,
-                month,
-                day,
-                hour,
-                minute,
-            }
-        }
-    }
-
-    impl fmt::Display for SimpleDateTime {
-        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            write!(
-                f,
-                "{:02}/{:02}/{} {:02}:{:02}",
-                self.day, self.month, self.year, self.hour, self.minute
-            )
-        }
-    }
+    (year, month, day)
 }
