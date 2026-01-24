@@ -5,11 +5,24 @@ from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from passlib.context import CryptContext
+from datetime import datetime, timedelta
+from jose import jwt
 
 DATABASE_URL = "postgresql://user:password@db/auth_db"
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
+SECRET_KEY = "esta_es_una_clave_muy_secreta_shhh"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
 
 class User(Base):
     __tablename__ = "users"
@@ -50,6 +63,9 @@ def get_db():
 def read_root():
     return {"mensaje": "¡Servicio de Auth (Python) activo!"}
 
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
 @app.post("/register")
 def register(user: UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.email == user.email).first()
@@ -64,16 +80,15 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     return {"mensaje": "Usuario creado", "email": new_user.email}
 
 @app.post("/login")
-def login(user: UserLogin, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.email == user.email).first()
-    if not db_user:
-        raise HTTPException(status_code=400, detail="Credenciales incorrectas")
+def login(request: UserLogin, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == request.email).first()
     
-    if not pwd_context.verify(user.password, db_user.hashed_password):
-        raise HTTPException(status_code=400, detail="Credenciales incorrectas")
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
     
-    return {
-        "access_token": "fake-jwt-token-rapido", 
-        "token_type": "bearer",
-        "user_id": db_user.id
-    }
+    if not verify_password(request.password, user.hashed_password):
+        raise HTTPException(status_code=400, detail="Contraseña incorrecta")
+    
+    access_token = create_access_token(data={"sub": user.email})
+    
+    return {"access_token": access_token, "token_type": "bearer"}

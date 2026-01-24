@@ -2,10 +2,42 @@
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+use Slim\Exception\HttpUnauthorizedException;
 
 require __DIR__ . '/../vendor/autoload.php';
 
+
 $app = AppFactory::create();
+
+$secretKey = "esta_es_una_clave_muy_secreta_shhh";
+
+$authMiddleware = function (Request $request, $handler) use ($secretKey) {
+
+    if ($request->getMethod() === 'OPTIONS') {
+        return $handler->handle($request);
+    }
+
+    $authHeader = $request->getHeaderLine('Authorization');
+
+    if (!$authHeader) {
+        throw new HttpUnauthorizedException($request, "Falta el token de autorización");
+    }
+
+    $token = str_replace('Bearer ', '', $authHeader);
+
+    try {
+        $decoded = JWT::decode($token, new Key($secretKey, 'HS256'));
+        
+        $request = $request->withAttribute('user', $decoded);
+        
+    } catch (Exception $e) {
+        throw new HttpUnauthorizedException($request, "Token inválido o expirado: " . $e->getMessage());
+    }
+
+    return $handler->handle($request);
+};
 
 $app->add(function ($request, $handler) {
     $response = $handler->handle($request);
@@ -26,11 +58,15 @@ $products = [
 $app->get('/products', function (Request $request, Response $response, $args) use ($products) {
     $response->getBody()->write(json_encode($products));
     return $response->withHeader('Content-Type', 'application/json');
-});
+})->add($authMiddleware);
 
 $app->get('/', function (Request $request, Response $response, $args) {
     $response->getBody()->write(json_encode(["mensaje" => "API de Productos Activa 🐘"]));
     return $response->withHeader('Content-Type', 'application/json');
+});
+
+$app->options('/{routes:.+}', function ($request, $response, $args) {
+    return $response;
 });
 
 $app->run();

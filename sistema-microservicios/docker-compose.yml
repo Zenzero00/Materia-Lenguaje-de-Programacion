@@ -43,7 +43,7 @@ services:
     build: ./inventory-service
     container_name: inventory_service
     ports:
-      - "8002:8000"
+      - "8002:8002"
     networks:
       - app-network
 

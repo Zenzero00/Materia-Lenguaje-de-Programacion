@@ -6,6 +6,7 @@ import axios from 'axios'
 const email = ref('')
 const password = ref('')
 const authMessage = ref('Esperando acción...')
+const token = ref('')
 
 const productsList = ref([])
 const productsMessage = ref('Haz clic para cargar')
@@ -28,19 +29,27 @@ const registerUser = async () => {
     authMessage.value = '✅ Registro exitoso. Haz Login.'
   } catch (error) { authMessage.value = '❌ Error: ' + (error.response?.data?.detail || error.message) }
 }
+
 const loginUser = async () => {
   authMessage.value = 'Verificando...'
   try {
     const res = await axios.post('http://127.0.0.1:8000/login', { email: email.value, password: password.value })
-    authMessage.value = '✅ Login Exitoso! Token recibido.'
-    console.log("Token:", res.data)
+    
+    token.value = res.data.access_token
+    
+    authMessage.value = '✅ Login Exitoso! Token guardado.'
+    console.log("Token:", token.value)
   } catch (error) { authMessage.value = '❌ Error: ' + (error.response?.data?.detail || error.message) }
 }
 
 const getProducts = async () => {
   productsMessage.value = 'Cargando...'
   try {
-    const res = await axios.get('http://127.0.0.1:8001/products')
+    const config = {
+      headers: { Authorization: `Bearer ${token.value}` }
+    }
+    const res = await axios.get('http://127.0.0.1:8001/products', config)
+    
     productsList.value = res.data
     productsMessage.value = '✅ Productos cargados'
   } catch (error) { productsMessage.value = '❌ Error: ' + error.message }
